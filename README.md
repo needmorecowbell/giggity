@@ -6,6 +6,10 @@
 
 Get information about an organization, user, or repo on github. Stores all data in a json file, organized heirarchically for easy database transfer or data analysis. All done through the github api, with or without authentication (authentication highly recommended).
 
+## Setup
+
+`pip3 install -r requirements.txt`
+
 
 ## Operation
 
