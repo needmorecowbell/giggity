@@ -19,10 +19,15 @@ class giggity():
         result = r.json()
         tree = {}
 
-        for account in result:
-            account["repos"]= self.getRepos(account["login"])
-            tree[account["login"]] = account
+        if(result["message"]=="Not Found"):
+            print("Organization Not Found")
+        
+        else: 
+            for account in result:
+                account["repos"]= self.getRepos(account["login"])
+                tree[account["login"]] = account
 
+            self.orgTree["users"] = tree
 
         self.orgTree["users"] = tree
         return tree
