@@ -108,7 +108,6 @@ if __name__ == '__main__':
 
     if(args.user):
         res= g.getRepos(target, args.verbose)
-        print(type(res))
         with open(outfile , 'w') as out:
             json.dump(res, out)
 

@@ -26,7 +26,21 @@ optional arguments:
 
 ```
 
-giggity can also be used as a module -- all data is stored within orgTree as a nested dict.
+**Example of Scraping a User**
+
+    `python3 giggity.py -a -O needmorecowbell.json -v -u needmorecowbell`
+
+- This will ask for authentication credentials, put the program into verbose mode, scrape github for the user needmorecowbell, then put the results into needmorecowbell.json
+
+**Example of Scraping an Organization**
+
+    `python3 giggity.py -a -o github -O github.json  `
+
+- This will ask for authentication, scrape the github organization on github, then put out the results in github.json
+
+**Giggity as a Module** 
+
+- giggity can also be used as a module -- all data is stored within orgTree as a nested dict.
 
 ```python
 import giggity
