@@ -75,9 +75,8 @@ if __name__ == '__main__':
  | (_| | | (_| | (_| | | |_| |_| |
   \__, |_|\__, |\__, |_|\__|\__, |
   |___/   |___/ |___/       |___/ 
-
 """)
-    print("\t a needmorecowbell project")
+    print("\t a needmorecowbell project\n")
     # Parse arguments.
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
