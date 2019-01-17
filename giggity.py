@@ -5,8 +5,8 @@ import json
 
 class giggity():
 
-    def __init__(self, auth_usr="", auth_pss=""):
-
+    def __init__(self, auth_usr="", auth_pss="", depth=1):
+        self.depth = depth
         self.orgTree = {}
         self.header ={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
         self.auth = (auth_usr,auth_pss)
@@ -36,9 +36,18 @@ class giggity():
         if(verbose):
             print("Getting followers of user: "+user)
             
-        r = requests.get("https://api.github.com/users/"+user+"/followers",headers=self.header, auth=self.auth)
-        result= r.json()
-        return result
+        r = requests.get("https://api.github.com/users/"+user+"/followers", headers=self.header, auth=self.auth)
+        result = r.json()
+        tree = {}
+        if self.depth > 0:
+            self.depth -= 1
+            for follower in result:
+                follower["followers"] = self.getFollowers(follower["login"])
+                tree[follower["login"]] = follower
+            self.orgTree["followers"] = tree
+        else:
+            self.orgTree["followers"] = tree
+        return tree
 
     def getRepos(self, user, verbose=False):
         if(verbose):
@@ -87,12 +96,11 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
     parser.add_argument("-a", "--authenticate", help="allows github authentication to avoid ratelimiting",action="store_true")
     parser.add_argument("-u", "--user",help="denotes that given input is a user",action="store_true")
+    parser.add_argument("-f", "--followers",help="denotes that given input is a user for which followers are to be generated", action="store_true")
     parser.add_argument("-o", "--org",help="denotes that given input is an organization",action="store_true")
     parser.add_argument("-O", "--outfile", dest="output", help="location to put generated json file")
-    parser.add_argument("path",help="name of organization or user (or url of  repository)")
+    parser.add_argument("path", help="name of organization or user (or url of  repository)")
 
-    
-    
     args = parser.parse_args() 
     
     outfile= "results.json"
@@ -120,6 +128,11 @@ if __name__ == '__main__':
 
     if(args.org):
         g.getUsers(target, args.verbose)
+        g.writeToFile(outfile)
+
+    if (args.followers):
+        res = g.getFollowers(target, args.verbose)
+        print(g.orgTree);
         g.writeToFile(outfile)
        
     print("Scraping Complete, file available at: "+outfile)
