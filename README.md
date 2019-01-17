@@ -1,7 +1,7 @@
 #  Giggity - grab heirarchical data about a github organization, user, or repo
 
 <p align="center">
-    <img src="res/logo.gif"></img>
+    <img src="https://user-images.githubusercontent.com/9204902/51312125-3aa4d700-1a53-11e9-89e8-a02063d93595.gif"></img>
 </p>
 
 Get information about an organization, user, or repo on github. Stores all data in a json file, organized heirarchically for easy database transfer or data analysis. All done through the github api, with or without authentication (authentication highly recommended).
@@ -32,13 +32,13 @@ optional arguments:
 
 **Example of Scraping a User**
 
-    `python3 giggity.py -a -O needmorecowbell.json -v -u needmorecowbell`
+    python3 giggity.py -a -O needmorecowbell.json -v -u needmorecowbell
 
 - This will ask for authentication credentials, put the program into verbose mode, scrape github for the user needmorecowbell, then put the results into needmorecowbell.json
 
 **Example of Scraping an Organization**
 
-    `python3 giggity.py -a -o github -O github.json  `
+    python3 giggity.py -a -o github -O github.json
 
 - This will ask for authentication, scrape the github organization on github, then put out the results in github.json
 
