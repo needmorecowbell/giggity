@@ -39,14 +39,15 @@ class giggity():
         r = requests.get("https://api.github.com/users/"+user+"/followers", headers=self.header, auth=self.auth)
         result = r.json()
         tree = {}
-        if self.depth > 0:
+        for follower in result:
             self.depth -= 1
-            for follower in result:
+            if self.depth > 0:
                 follower["followers"] = self.getFollowers(follower["login"])
-                tree[follower["login"]] = follower
+            self.depth += 1
+            tree[follower["login"]] = follower
             self.orgTree["followers"] = tree
-        else:
-            self.orgTree["followers"] = tree
+
+        self.orgTree["followers"] = tree
         return tree
 
     def getRepos(self, user, verbose=False):
@@ -97,6 +98,7 @@ if __name__ == '__main__':
     parser.add_argument("-a", "--authenticate", help="allows github authentication to avoid ratelimiting",action="store_true")
     parser.add_argument("-u", "--user",help="denotes that given input is a user",action="store_true")
     parser.add_argument("-f", "--followers",help="denotes that given input is a user for which followers are to be generated", action="store_true")
+    parser.add_argument("-d", "--depth", help="indicates the depth for extracting followers info")
     parser.add_argument("-o", "--org",help="denotes that given input is an organization",action="store_true")
     parser.add_argument("-O", "--outfile", dest="output", help="location to put generated json file")
     parser.add_argument("path", help="name of organization or user (or url of  repository)")
@@ -116,7 +118,10 @@ if __name__ == '__main__':
     if(args.authenticate):
         user = input("Enter Github Username: ")
         psswd = getpass.getpass("Enter Github Password: ")
-        g = giggity(user ,psswd)
+        if (args.depth):
+            g = giggity(user, psswd, int(args.depth))
+        else:
+            g = giggity(user, psswd)
     else:
         g = giggity()
 
@@ -125,15 +130,15 @@ if __name__ == '__main__':
         with open(outfile , 'w') as out:
             json.dump(res, out)
 
-
     if(args.org):
         g.getUsers(target, args.verbose)
         g.writeToFile(outfile)
 
     if (args.followers):
         res = g.getFollowers(target, args.verbose)
-        print(g.orgTree);
-        g.writeToFile(outfile)
+        print(g.orgTree)
+        with open(outfile , 'w') as out:
+            json.dump(res, out)
        
     print("Scraping Complete, file available at: "+outfile)
 
