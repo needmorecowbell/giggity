@@ -18,7 +18,6 @@ class giggity():
         r = requests.get("https://api.github.com/orgs/"+org+"/members", headers=self.header, auth=self.auth)
         result = r.json()
         tree = {}
-        print(result)
 
         if("message" in result):
             print("Organization Not Found")
@@ -36,35 +35,56 @@ class giggity():
     def getFollowers(self, user, verbose=False):
         if(verbose):
             print("Getting followers of user: "+user)
-            
-        r = requests.get("https://api.github.com/users/"+user+"/followers",headers=self.header, auth=self.auth)
-        result= r.json()
-        return result
+        page=1
+        isEmpty=False;
+        followerList=[]
+        
+        while(not isEmpty):
+            r = requests.get("https://api.github.com/users/"+user+"/followers?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
+            result= r.json()
+            page+=1
+            if(len(result)==0):
+                isEmpty=True
+            elif("message" in  result):
+                print("User not found")
+            else:
+                if(verbose):
+                    print("Number of followers: "+str(len(result)))
+                followerList.append(result)
+        
+        return followerList
+
 
     def getRepos(self, user, verbose=False):
         if(verbose):
             print("Getting repositories for user: "+user)
-
-        r = requests.get("https://api.github.com/users/"+user+"/repos", headers=self.header, auth=self.auth)
-        result = r.json()
+        page=1
+        isEmpty=False;
         repoTree= {}
-
-        if("message" in result):
-            print("User Not Found")
         
-        else: 
- 
-            for repo in result:
-                if(verbose):
-                    print("Getting repo: "+repo["name"])
-                tree= {"name": repo["name"],
-                       "url":repo["html_url"],
-                       "fork":repo["fork"],
-                       "description":repo["description"],
-                       "created_at":repo["created_at"],
-                       "updated_at":repo["updated_at"],
-                       }
-                repoTree[repo["name"]]=tree
+        while(not isEmpty):
+            r = requests.get("https://api.github.com/users/"+user+"/repos?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
+            result = r.json()
+            page+=1
+            if("message" in result):
+                print("User Not Found")
+            elif(len(result)==0):
+                isEmpty=True
+                print("No more results!")
+            else: 
+                print("Number of repositories: "+str(len(result)))
+
+                for repo in result:
+                    if(verbose):
+                        print("Getting repo: "+repo["name"])
+                    tree= {"name": repo["name"],
+                           "url":repo["html_url"],
+                           "fork":repo["fork"],
+                           "description":repo["description"],
+                           "created_at":repo["created_at"],
+                           "updated_at":repo["updated_at"],
+                           }
+                    repoTree[repo["name"]]=tree
             
         return repoTree
 
