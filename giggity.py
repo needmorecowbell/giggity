@@ -20,7 +20,7 @@ class giggity():
         tree = {}
 
         while(not isEmpty):
-            r = requests.get("https://api.github.com/orgs/"+org+"/members?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
+            r = requests.get("https://api.github.com/orgs/"+org+"/members?page="+str(page)+"&per_page=10", headers=self.header, auth=self.auth)
             result= r.json()
             page+=1
             if(len(result)==0):
