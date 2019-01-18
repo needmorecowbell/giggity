@@ -18,8 +18,9 @@ class giggity():
         r = requests.get("https://api.github.com/orgs/"+org+"/members", headers=self.header, auth=self.auth)
         result = r.json()
         tree = {}
+        print(result)
 
-        if(result["message"]=="Not Found"):
+        if("message" in result):
             print("Organization Not Found")
         
         else: 
@@ -48,18 +49,23 @@ class giggity():
         result = r.json()
         repoTree= {}
 
-        for repo in result:
-            if(verbose):
-                print("Getting repo: "+repo["name"])
-            tree= {"name": repo["name"],
-                   "url":repo["html_url"],
-                   "fork":repo["fork"],
-                   "description":repo["description"],
-                   "created_at":repo["created_at"],
-                   "updated_at":repo["updated_at"],
-                   }
-            repoTree[repo["name"]]=tree
+        if("message" in result):
+            print("User Not Found")
         
+        else: 
+ 
+            for repo in result:
+                if(verbose):
+                    print("Getting repo: "+repo["name"])
+                tree= {"name": repo["name"],
+                       "url":repo["html_url"],
+                       "fork":repo["fork"],
+                       "description":repo["description"],
+                       "created_at":repo["created_at"],
+                       "updated_at":repo["updated_at"],
+                       }
+                repoTree[repo["name"]]=tree
+            
         return repoTree
 
     def getTree(self):
@@ -115,7 +121,7 @@ if __name__ == '__main__':
     if(args.user):
         res= g.getRepos(target, args.verbose)
         with open(outfile , 'w') as out:
-            json.dump(res, out)
+            json.dump(res, out, indent=4 , sort_keys=True)
 
 
     if(args.org):
