@@ -47,12 +47,14 @@ optional arguments:
 - giggity can also be used as a module -- all data is stored within orgTree as a nested dict.
 
 ```python
-import giggity
+from giggity import giggity
 
 g = giggity("username","password")
-data = g.getUsers("organization-name")
+data = g.getUsers("organization-name", followers=True)
 
 print("List of users in organization: ")
 for user, info in data.items():
     print(user)
+
+data = g.getEmails("username", verbose=True) # Get any emails found
 ```
