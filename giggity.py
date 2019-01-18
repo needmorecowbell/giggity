@@ -15,22 +15,31 @@ class giggity():
         if(verbose):
             print("Sraping organization: "+org)
 
-        r = requests.get("https://api.github.com/orgs/"+org+"/members", headers=self.header, auth=self.auth)
-        result = r.json()
+        page=1
+        isEmpty=False;
         tree = {}
 
-        if("message" in result):
-            print("Organization Not Found")
-        
-        else: 
-            for account in result:
-                account["repos"]= self.getRepos(account["login"])
-                tree[account["login"]] = account
+        while(not isEmpty):
+            r = requests.get("https://api.github.com/orgs/"+org+"/members?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
+            result= r.json()
+            page+=1
+            if(len(result)==0):
+                isEmpty=True
+            elif("message" in  result):
+                print("Organization not found")
+            else:
+                for account in result:
+                    #This is where you would branch out and do additional searches on an account
+                    account["repos"]= self.getRepos(account["login"], verbose) #ie, get all user repos, then tie them back into the data structure before appending it to tree
 
-            self.orgTree["users"] = tree
+                    tree[account["login"]] = account
+
+                self.orgTree["users"] = tree
 
         self.orgTree["users"] = tree
         return tree
+
+
 
     def getFollowers(self, user, verbose=False):
         if(verbose):
@@ -50,7 +59,7 @@ class giggity():
             else:
                 if(verbose):
                     print("Number of followers: "+str(len(result)))
-                followerList.append(result)
+                followerList= followerList + result
         
         return followerList
 
@@ -70,10 +79,9 @@ class giggity():
                 print("User Not Found")
             elif(len(result)==0):
                 isEmpty=True
-                print("No more results!")
             else: 
-                print("Number of repositories: "+str(len(result)))
-
+                if(verbose):
+                    print("Number of repositories: "+str(len(result)))
                 for repo in result:
                     if(verbose):
                         print("Getting repo: "+repo["name"])
