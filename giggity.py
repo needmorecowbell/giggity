@@ -30,9 +30,25 @@ class giggity():
                 print("Organization not found")
             else:
                 for account in result:
+ 
+                    #Remove unnecessary items
+                    account.pop('node_id', None)
+                    account.pop('avatar_url',None)
+                    account.pop('gravatar_id',None)
+                    account.pop('url',None)
+                    account.pop('followers_url', None)
+                    account.pop('following_url',None)
+                    account.pop('gists_url',None)
+                    account.pop('starred_url',None)
+                    account.pop('subscriptions_url', None)
+                    account.pop('organizations_url',None)
+                    account.pop('repos_url',None)
+                    account.pop('events_url',None)
+                    account.pop('received_events_url',None)
+
+
                     #This is where you would branch out and do additional searches on an account
                     account["repos"]= self.getRepos(account["login"], verbose) #ie, get all user repos, then tie them back into the data structure before appending it to tree
-
                     if(followers):
                         account["followers"]= self.getFollowers(account["login"],verbose)
                     
@@ -61,6 +77,23 @@ class giggity():
                 print("User not found")
             else:
                 for account in result:
+                    
+                    #Remove unnecessary items
+                    account.pop('node_id', None)
+                    account.pop('avatar_url',None)
+                    account.pop('gravatar_id',None)
+                    account.pop('url',None)
+                    account.pop('followers_url', None)
+                    account.pop('following_url',None)
+                    account.pop('gists_url',None)
+                    account.pop('starred_url',None)
+                    account.pop('subscriptions_url', None)
+                    account.pop('organizations_url',None)
+                    account.pop('repos_url',None)
+                    account.pop('events_url',None)
+                    account.pop('received_events_url',None)
+
+                    #add user's data as branch of main tree 
                     tree[account["login"]]= account
         
         return tree
