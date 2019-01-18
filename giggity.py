@@ -1,6 +1,7 @@
 import getpass 
 import argparse
 import requests
+from nested_lookup import nested_lookup
 import json
 
 class giggity():
@@ -51,10 +52,11 @@ class giggity():
                     account["repos"]= self.getRepos(account["login"], verbose) #ie, get all user repos, then tie them back into the data structure before appending it to tree
                     if(followers):
                         account["followers"]= self.getFollowers(account["login"],verbose)
-                    
+                   
+                    account["emails"] = self.getEmails(account["login"],verbose)
+
                     tree[account["login"]] = account
 
-                self.orgTree["users"] = tree
 
         self.orgTree["users"] = tree
         return tree
@@ -62,22 +64,26 @@ class giggity():
 
 
     def getFollowers(self, user, verbose=False):
+
         if(verbose):
             print("Getting followers of user: "+user)
+
         page=1
         isEmpty=False;
         tree= {}
+        
         while(not isEmpty):
             r = requests.get("https://api.github.com/users/"+user+"/followers?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
             result= r.json()
             page+=1
+
             if(len(result)==0):
                 isEmpty=True
+
             elif("message" in  result):
                 print("User not found")
             else:
                 for account in result:
-                    
                     #Remove unnecessary items
                     account.pop('node_id', None)
                     account.pop('avatar_url',None)
@@ -98,7 +104,39 @@ class giggity():
         
         return tree
 
+    def getEmails(self, user, verbose=False):
+        if(verbose):
+            print("Getting any emails from user: "+user)
 
+        page=1
+        isEmpty=False;
+        emails= [] # avoid duplicates with a set
+        
+        while(not isEmpty):
+            r = requests.get("https://api.github.com/users/"+user+"/events/public?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
+            result = r.json()
+            page+=1
+            
+            if("message" in result):
+                print("Api Pagination Limit Reached")
+                isEmpty=True
+            elif(len(result)==0):
+                isEmpty=True
+            else: 
+                for event in result:
+                    res = set(nested_lookup("email",event))
+
+                    if(len(res)>0):
+                        emails= emails+ list(res)
+
+                    #print(set(nested_lookup("email",event)))
+                    #emails.add(set(nested_lookup("email",event)))
+
+        if(verbose):
+             print("Number of emails found for : "+str(len(emails)))
+
+        return emails
+ 
     def getRepos(self, user, verbose=False):
         if(verbose):
             print("Getting repositories for user: "+user)
@@ -119,6 +157,7 @@ class giggity():
             else: 
                 if(verbose):
                     print("Number of repositories: "+str(len(result)))
+
                 for repo in result:
                     tree= {"name": repo["name"],
                            "url":repo["html_url"],
@@ -127,10 +166,11 @@ class giggity():
                            "created_at":repo["created_at"],
                            "updated_at":repo["updated_at"],
                            }
+
                     repoTree[repo["name"]]=tree
             
         return repoTree
-
+    
     def getTree(self):
         return json.dumps(self.orgTree,indent=4, sort_keys=True)
     
