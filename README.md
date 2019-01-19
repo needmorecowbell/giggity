@@ -58,3 +58,5 @@ for user, info in data.items():
 
 data = g.getEmails("username", verbose=True) # Get any emails found
 ```
+
+**Other examples of how to use giggity are available in the util folder.**
