@@ -49,12 +49,15 @@ class giggity():
 
 
                     #This is where you would branch out and do additional searches on an account
-                    account["repos"]= self.getRepos(account["login"], verbose) #ie, get all user repos, then tie them back into the data structure before appending it to tree
+                    account["repos"]= self.getRepos(account["login"], verbose) 
+                    #ie, get all user repos, then tie them back into the data structure before appending it to tree
+
                     if(followers):
                         account["followers"]= self.getFollowers(account["login"],verbose)
                    
                     account["emails"] = self.getEmails(account["login"],verbose)
 
+                    account["names"] = self.getNames(account["login"], verbose)
                     tree[account["login"]] = account
 
 
@@ -64,9 +67,6 @@ class giggity():
 
 
     def getFollowers(self, user, verbose=False):
-
-        if(verbose):
-            print("Getting followers of user: "+user)
 
         page=1
         isEmpty=False;
@@ -99,18 +99,24 @@ class giggity():
                     account.pop('events_url',None)
                     account.pop('received_events_url',None)
 
+                    #This is where additional queries for followers will go (get names, emails, etc)
+                    account["emails"] = self.getEmails(account["login"],verbose)
+                    account["names"] = self.getNames(account["login"], verbose)
+
                     #add user's data as branch of main tree 
                     tree[account["login"]]= account
+         
+        if(verbose):
+             print("["+user+"] Number of followers found: "+str(len(tree.items())))
         
+
         return tree
 
     def getEmails(self, user, verbose=False):
-        if(verbose):
-            print("Getting any emails from user: "+user)
 
         page=1
         isEmpty=False;
-        emails= [] # avoid duplicates with a set
+        emails= [] 
         
         while(not isEmpty):
             r = requests.get("https://api.github.com/users/"+user+"/events/public?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
@@ -118,28 +124,59 @@ class giggity():
             page+=1
             
             if("message" in result):
-                print("Api Pagination Limit Reached")
+                print("Error: "+result["message"])
                 isEmpty=True
+
             elif(len(result)==0):
                 isEmpty=True
             else: 
                 for event in result:
                     res = set(nested_lookup("email",event))
 
-                    if(len(res)>0):
+                    if(len(res)>0): #append any new emails
                         emails= emails+ list(res)
 
-                    #print(set(nested_lookup("email",event)))
-                    #emails.add(set(nested_lookup("email",event)))
-
+        emails = list(set(emails)) # remove duplicates
+        
         if(verbose):
-             print("Number of emails found for : "+str(len(emails)))
-
+             print("["+user+"] Number of emails found: "+str(len(emails)))
+        
         return emails
+    
+    def getNames(self, user, verbose=False):
+
+        page=1
+        isEmpty=False;
+        names= [] # avoid duplicates with a set
+        
+        while(not isEmpty):
+            r = requests.get("https://api.github.com/users/"+user+"/events/public?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
+            result = r.json()
+            page+=1
+            
+            if("message" in result):
+
+                print("Error: "+result["message"])
+
+                isEmpty=True
+            elif(len(result)==0):
+                isEmpty=True
+            else: 
+                for event in result:
+                    res = nested_lookup("author",event)
+                    for author in res:
+                        name= nested_lookup("name",author)
+                   # res = set(nested_lookup("name",res))
+                    if(len(res)>0):
+                        names= names + name
+
+        names = list(set(names))
+        if(verbose):
+             print("["+user+"] Number of names found: "+str(len(names)))
+
+        return names
  
     def getRepos(self, user, verbose=False):
-        if(verbose):
-            print("Getting repositories for user: "+user)
 
         page=1
         isEmpty=False;
@@ -156,7 +193,7 @@ class giggity():
                 isEmpty=True
             else: 
                 if(verbose):
-                    print("Number of repositories: "+str(len(result)))
+                    print("["+user+"] Number of repositories found: "+str(len(result)))
 
                 for repo in result:
                     tree= {"name": repo["name"],
@@ -225,6 +262,8 @@ if __name__ == '__main__':
     if(args.user):
         tree={} 
         tree["repos"]= g.getRepos(target, args.verbose)
+        tree["emails"]= g.getEmails(target, args.verbose)
+        tree["names"] = g.getNames(target, args.verbose)
 
         if(args.followers):
             tree["followers"] = g.getFollowers(target, args.verbose)
