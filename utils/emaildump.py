@@ -1,5 +1,5 @@
 ###
-# Scrapes all emails from an organization scrape
+# Scrapes all emails from an organization
 #
 ###
 

@@ -124,8 +124,11 @@ class giggity():
             page+=1
             
             if("message" in result):
-                print("Error: "+result["message"])
-                isEmpty=True
+                if("pagination" in result["message"]):
+                    isEmpty=True
+                else:
+                    print("Error: "+result["message"])
+                    isEmpty=True
 
             elif(len(result)==0):
                 isEmpty=True
@@ -155,10 +158,12 @@ class giggity():
             page+=1
             
             if("message" in result):
+                if("pagination" in result["message"]):
+                    isEmpty = True
+                else:
+                    print("Error: "+result["message"])
+                    isEmpty=True
 
-                print("Error: "+result["message"])
-
-                isEmpty=True
             elif(len(result)==0):
                 isEmpty=True
             else: 
