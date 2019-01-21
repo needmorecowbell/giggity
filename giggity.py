@@ -65,23 +65,22 @@ class giggity():
         self.orgTree["users"] = tree
         return tree
 
-
-
-    def getFollowers(self, user, verbose=False):
-
+    def getFollowers(self, user, depth=0, verbose=False):
         page=1
         isEmpty=False;
         tree= {}
-        
-        while(not isEmpty):
-            r = requests.get("https://api.github.com/users/"+user+"/followers?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
-            result= r.json()
-            page+=1
 
-            if(len(result)==0):
-                isEmpty=True
+        while (not isEmpty):
+            r = requests.get(
+                "https://api.github.com/users/" + user + "/followers?page=" + str(page) + "&per_page=100",
+                headers=self.header, auth=self.auth)
+            result = r.json()
+            page += 1
 
-            elif("message" in  result):
+            if (len(result) == 0):
+                isEmpty = True
+
+            elif ("message" in result):
                 print("User not found")
             else:
                 for account in result:
@@ -104,9 +103,14 @@ class giggity():
                     account["emails"] = self.getEmails(account["login"],verbose)
                     account["names"] = self.getNames(account["login"], verbose)
 
-                    #add user's data as branch of main tree 
-                    tree[account["login"]]= account
-         
+                    depth -= 1
+                    if depth >= 0:
+                        account["followers"] = self.getFollowers(account["login"], depth, verbose)
+                    depth += 1
+
+                    # add user's data as branch of main tree
+                    tree[account["login"]] = account
+
         if(verbose):
              print("["+user+"] Number of followers found: "+str(len(tree.items())))
         
@@ -201,15 +205,16 @@ class giggity():
                     print("["+user+"] Number of repositories found: "+str(len(result)))
 
                 for repo in result:
-                    tree= {"name": repo["name"],
-                           "url":repo["html_url"],
-                           "fork":repo["fork"],
-                           "description":repo["description"],
-                           "created_at":repo["created_at"],
-                           "updated_at":repo["updated_at"],
-                           }
+                    tree = {
+                        "name": repo["name"],
+                        "url":repo["html_url"],
+                        "fork":repo["fork"],
+                        "description":repo["description"],
+                        "created_at":repo["created_at"],
+                        "updated_at":repo["updated_at"],
+                    }
 
-                    repoTree[repo["name"]]=tree
+                    repoTree[repo["name"]] = tree
             
         return repoTree
     
@@ -238,7 +243,6 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
     parser.add_argument("-a", "--authenticate", help="allows github authentication to avoid ratelimiting",action="store_true")
     parser.add_argument("-u", "--user",help="denotes that given input is a user",action="store_true")
-    parser.add_argument("-f", "--followers",help="denotes that given input is a user for which followers are to be generated", action="store_true")
     parser.add_argument("-d", "--depth", help="indicates the depth for extracting followers info")
     parser.add_argument("-o", "--org",help="denotes that given input is an organization",action="store_true")
     parser.add_argument("-f", "--followers",help="adds followers entry to each account",action="store_true")
@@ -274,7 +278,7 @@ if __name__ == '__main__':
         tree["names"] = g.getNames(target, args.verbose)
 
         if(args.followers):
-            tree["followers"] = g.getFollowers(target, args.verbose)
+            tree["followers"] = g.getFollowers(target, int(args.depth), args.verbose)
 
         with open(outfile , 'w') as out:
             json.dump(tree, out, indent=4 , sort_keys=True)
@@ -282,12 +286,6 @@ if __name__ == '__main__':
     if(args.org):
         g.getUsers(target, args.verbose, args.followers)
         g.writeToFile(outfile)
-
-    if (args.followers):
-        res = g.getFollowers(target, args.verbose)
-        print(g.orgTree)
-        with open(outfile , 'w') as out:
-            json.dump(res, out)
        
     print("Scraping Complete, file available at: "+outfile)
 
