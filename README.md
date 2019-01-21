@@ -1,10 +1,10 @@
-#  Giggity - grab heirarchical data about a github organization, user, or repo
+#  Giggity - grab hierarchical data about a github organization, user, or repo
 
 <p align="center">
     <img src="https://user-images.githubusercontent.com/9204902/51312125-3aa4d700-1a53-11e9-89e8-a02063d93595.gif"></img>
 </p>
 
-Get information about an organization, user, or repo on github. Stores all data in a json file, organized heirarchically for easy database transfer or data analysis. All done through the github api, with or without authentication (authentication highly recommended).
+Get information about an organization, user, or repo on github. Stores all data in a json file, organized in a tree of dictionaries for easy database transfer or data analysis. All done through the github api, with or without authentication (authentication highly recommended).
 
 ## Setup
 
@@ -47,12 +47,16 @@ optional arguments:
 - giggity can also be used as a module -- all data is stored within orgTree as a nested dict.
 
 ```python
-import giggity
+from giggity import giggity
 
 g = giggity("username","password")
-data = g.getUsers("organization-name")
+data = g.getUsers("organization-name", followers=True)
 
 print("List of users in organization: ")
 for user, info in data.items():
     print(user)
+
+data = g.getEmails("username", verbose=True) # Get any emails found
 ```
+
+**Other examples of how to use giggity are available in the util folder.**
