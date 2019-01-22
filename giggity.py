@@ -5,8 +5,9 @@ from nested_lookup import nested_lookup
 import json
 
 class giggity():
-    
+
     def __init__(self, auth_usr="", auth_pss=""):
+        self.depth = depth
 
         self.orgTree = {}
         self.header ={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
@@ -64,23 +65,22 @@ class giggity():
         self.orgTree["users"] = tree
         return tree
 
-
-
-    def getFollowers(self, user, verbose=False):
-
+    def getFollowers(self, user, depth=0, verbose=False):
         page=1
         isEmpty=False;
         tree= {}
-        
-        while(not isEmpty):
-            r = requests.get("https://api.github.com/users/"+user+"/followers?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
-            result= r.json()
-            page+=1
 
-            if(len(result)==0):
-                isEmpty=True
+        while (not isEmpty):
+            r = requests.get(
+                "https://api.github.com/users/" + user + "/followers?page=" + str(page) + "&per_page=100",
+                headers=self.header, auth=self.auth)
+            result = r.json()
+            page += 1
 
-            elif("message" in  result):
+            if (len(result) == 0):
+                isEmpty = True
+
+            elif ("message" in result):
                 print("User not found")
             else:
                 for account in result:
@@ -103,9 +103,14 @@ class giggity():
                     account["emails"] = self.getEmails(account["login"],verbose)
                     account["names"] = self.getNames(account["login"], verbose)
 
-                    #add user's data as branch of main tree 
-                    tree[account["login"]]= account
-         
+                    depth -= 1
+                    if depth >= 0:
+                        account["followers"] = self.getFollowers(account["login"], depth, verbose)
+                    depth += 1
+
+                    # add user's data as branch of main tree
+                    tree[account["login"]] = account
+
         if(verbose):
              print("["+user+"] Number of followers found: "+str(len(tree.items())))
         
@@ -122,7 +127,6 @@ class giggity():
             r = requests.get("https://api.github.com/users/"+user+"/events/public?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
             result = r.json()
             page+=1
-            
             if("message" in result):
                 if("pagination" in result["message"]):
                     isEmpty=True
@@ -201,15 +205,16 @@ class giggity():
                     print("["+user+"] Number of repositories found: "+str(len(result)))
 
                 for repo in result:
-                    tree= {"name": repo["name"],
-                           "url":repo["html_url"],
-                           "fork":repo["fork"],
-                           "description":repo["description"],
-                           "created_at":repo["created_at"],
-                           "updated_at":repo["updated_at"],
-                           }
+                    tree = {
+                        "name": repo["name"],
+                        "url":repo["html_url"],
+                        "fork":repo["fork"],
+                        "description":repo["description"],
+                        "created_at":repo["created_at"],
+                        "updated_at":repo["updated_at"],
+                    }
 
-                    repoTree[repo["name"]]=tree
+                    repoTree[repo["name"]] = tree
             
         return repoTree
     
@@ -238,13 +243,12 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
     parser.add_argument("-a", "--authenticate", help="allows github authentication to avoid ratelimiting",action="store_true")
     parser.add_argument("-u", "--user",help="denotes that given input is a user",action="store_true")
+    parser.add_argument("-d", "--depth", help="indicates the depth for extracting followers info")
     parser.add_argument("-o", "--org",help="denotes that given input is an organization",action="store_true")
     parser.add_argument("-f", "--followers",help="adds followers entry to each account",action="store_true")
     parser.add_argument("-O", "--outfile", dest="output", help="location to put generated json file")
-    parser.add_argument("path",help="name of organization or user (or url of  repository)")
-    
-    
-    
+    parser.add_argument("path", help="name of organization or user (or url of  repository)")
+
     args = parser.parse_args() 
     
     outfile= "results.json"
@@ -260,7 +264,10 @@ if __name__ == '__main__':
     if(args.authenticate):
         user = input("Enter Github Username: ")
         psswd = getpass.getpass("Enter Github Password: ")
-        g = giggity(user ,psswd)
+        if (args.depth):
+            g = giggity(user, psswd, int(args.depth))
+        else:
+            g = giggity(user, psswd)
     else:
         g = giggity()
 
@@ -271,11 +278,10 @@ if __name__ == '__main__':
         tree["names"] = g.getNames(target, args.verbose)
 
         if(args.followers):
-            tree["followers"] = g.getFollowers(target, args.verbose)
+            tree["followers"] = g.getFollowers(target, int(args.depth), args.verbose)
 
         with open(outfile , 'w') as out:
             json.dump(tree, out, indent=4 , sort_keys=True)
-
 
     if(args.org):
         g.getUsers(target, args.verbose, args.followers)
