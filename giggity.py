@@ -6,7 +6,7 @@ import json
 
 class giggity():
 
-    def __init__(self, auth_usr="", auth_pss="", depth=1):
+    def __init__(self, auth_usr="", auth_pss=""):
         self.depth = depth
 
         self.orgTree = {}
