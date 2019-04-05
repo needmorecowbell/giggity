@@ -60,3 +60,43 @@ data = g.getEmails("username", verbose=True) # Get any emails found
 ```
 
 **Other examples of how to use giggity are available in the util folder.**
+
+**Example Output**
+
+
+When `python3 giggity.py -a -u geohot -O output.json` is used..
+
+output.json contains: 
+
+```json
+{
+    "emails": [
+        "george@comma.ai",
+        "other emails taken out of example"
+    
+    ],
+    "names": [
+        "Charles Ellis",
+        "George Hotz"
+    ],
+    "repos": {
+        "ORB_SLAM2": {
+            "created_at": "2017-04-08T00:21:13Z",
+            "description": "ORBSLAM2 running on Mac OS X cause I was on a plane and bored and maybe useful for someone?",
+            "fork": true,
+            "name": "ORB_SLAM2",
+            "updated_at": "2018-10-22T23:51:28Z",
+            "url": "https://github.com/geohot/ORB_SLAM2"
+        },
+        { Many more repositories cut out for the example },
+        "xnu-deps-linux": {
+            "created_at": "2013-10-02T00:36:29Z",
+            "description": "Mig/cctools for Linux combo makefile thingy",
+            "fork": true,
+            "name": "xnu-deps-linux",
+            "updated_at": "2016-05-01T16:04:45Z",
+            "url": "https://github.com/geohot/xnu-deps-linux"
+        }
+    }
+}
+```
