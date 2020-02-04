@@ -185,14 +185,17 @@ class giggity():
 
         return names
 
-    def getRepos(self, user, verbose=False):
+    def getRepos(self, user, org=False, verbose=False):
 
         page=1
         isEmpty=False;
         repoTree= {}
 
         while(not isEmpty):
-            r = requests.get("https://api.github.com/users/"+user+"/repos?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
+            if(org):
+                r = requests.get("https://api.github.com/orgs/"+user+"/repos?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
+            else:
+                r = requests.get("https://api.github.com/users/"+user+"/repos?page="+str(page)+"&per_page=100", headers=self.header, auth=self.auth)
             result = r.json()
             page+=1
 
@@ -273,19 +276,23 @@ if __name__ == '__main__':
 
     if(args.user):
         tree={}
-        tree["repos"]= g.getRepos(target, args.verbose)
-        tree["emails"]= g.getEmails(target, args.verbose)
-        tree["names"] = g.getNames(target, args.verbose)
+        tree["repos"]= g.getRepos(target, verbose=args.verbose)
+        tree["emails"]= g.getEmails(target, verbose=args.verbose)
+        tree["names"] = g.getNames(target, verbose=args.verbose)
 
         if(args.followers):
-            tree["followers"] = g.getFollowers(target, int(args.depth), args.verbose)
+            tree["followers"] = g.getFollowers(target, int(args.depth), verbose=args.verbose)
 
         with open(outfile , 'w') as out:
             json.dump(tree, out, indent=4 , sort_keys=True)
 
     if(args.org):
-        g.getUsers(target, args.verbose, args.followers)
-        g.writeToFile(outfile)
+        tree = {}
+        tree["repos"] = g.getRepos(target, org=True, verbose=True )
+
+        tree["users"]= g.getUsers(target, verbose=args.verbose, followers=args.followers)
+        with open(outfile , 'w') as out:
+            json.dump(tree, out, indent=4 , sort_keys=True)
 
     print("Scraping Complete, file available at: "+outfile)
 
