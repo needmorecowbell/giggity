@@ -6,7 +6,7 @@ import json
 
 class giggity():
 
-    def __init__(self, auth_usr="", auth_pss="", depth=0):
+    def __init__(self, auth_usr="", auth_pss="", depth=1):
         self.depth = depth
 
         self.orgTree = {}
@@ -228,10 +228,7 @@ class giggity():
         with open(filepath , 'w') as outfile:
             json.dump(self.orgTree, outfile, indent=4 , sort_keys=True)
 
-
-
-if __name__ == '__main__':
-
+def main():
     print("""
 
    __ _(_) __ _  __ _(_) |_ _   _
@@ -294,7 +291,13 @@ if __name__ == '__main__':
         with open(outfile , 'w') as out:
             json.dump(tree, out, indent=4 , sort_keys=True)
 
+        g.getUsers(target, args.verbose, args.followers)
+        g.writeToFile(outfile)
+
     print("Scraping Complete, file available at: "+outfile)
 
 
 
+
+if __name__ == '__main__':
+    main()
