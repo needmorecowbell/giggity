@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="giggity", 
-    version="1.0.0",
+    version="1.0.1",
     author="Adam Musciano",
     author_email="amusciano@gmail.com",
     description="CLI Git Sleuth Tool",
