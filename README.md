@@ -8,6 +8,11 @@ Get information about an organization, user, or repo on github. Stores all data 
 
 ## Setup
 
+`pip3 install giggity`
+
+
+or clone the repository and run: 
+
 `pip3 install -r requirements.txt`
 
 
