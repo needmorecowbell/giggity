@@ -6,6 +6,8 @@
 
 Get information about an organization, user, or repo on github. Stores all data in a json file, organized in a tree of dictionaries for easy database transfer or data analysis. All done through the github api, with or without authentication (authentication highly recommended).
 
+**Warning:** Github API still supports v3 (what this script uses), however they are making the shift to graphql in v4. [Here](https://developer.github.com/v4/guides/migrating-from-rest/) is a post on migrating from v3. I don't know if I will update this script before it becomes deprecated, but beware.
+
 ## Setup
 
 `pip3 install giggity`
