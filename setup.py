@@ -18,7 +18,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
     ],
     install_requires=[            
-        'requests==2.20.0',
+        'requests==2.31.0',
         'nested_lookup==0.2.12'
     ],
     entry_points = {
